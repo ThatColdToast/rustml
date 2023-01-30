@@ -19,10 +19,17 @@ impl Layer {
         }
     }
 
-    pub fn propagate(&mut self, lastLayer: &Layer) {
+    pub fn propagate(&mut self, lastLayer: &mut Layer) {
         for i in 0..self.neurons.len() {
             // println!("Neuron Prop: #{}", i);
             self.neurons[i].propagate(&lastLayer.neurons)
+        }
+    }
+
+    pub fn backpropagate(&mut self, lastLayer: &mut Layer) {
+        for i in 0..self.neurons.len() {
+            // println!("Neuron Prop: #{}", i);
+            self.neurons[i].backpropagate(&mut lastLayer.neurons)
         }
     }
 

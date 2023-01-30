@@ -57,10 +57,10 @@ fn getTrainingData() -> (Vec<u8>, i32, i32, i32, Vec<u8>) {
 
 fn main() {
     println!("Starting...");
-    let (images, imageCount, rowCount, columnCount, labels) = getTrainingData();
+    // let (images, imageCount, rowCount, columnCount, labels) = getTrainingData();
 
     let mut map = Vec::new();
-    map.push(rowCount * columnCount);
+    // map.push(rowCount * columnCount);
     map.push(100);
     map.push(30);
     map.push(10);
@@ -70,13 +70,14 @@ fn main() {
     
     println!(" - Network Trained -");
 
-    network.propagate();
+    // network.propagate();
     println!(" - Network Prediction: -");
     // network.print();
 
+    network.backpropagate();
 
-    let zero = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
-    println!(" - Network Cost: {} -", network.cost(&zero));
+    // let zero = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
+    // println!(" - Network Cost: {} -", network.cost(&zero));
 
     // network.print();
 }

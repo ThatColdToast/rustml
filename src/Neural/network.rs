@@ -1,111 +1,60 @@
-pub use super::layer::Layer;
-use std::{collections::LinkedList, borrow::BorrowMut};
+#![allow(non_snake_case)]
 
+pub use super::Layer;
+pub use super::TrainingSet;
+
+use std::rc::Rc;
+use std::cell::RefCell;
+
+#[derive(Debug)]
 pub struct Network {
-    // layers: LinkedList<Layer>,
-    layers: Vec<Layer>,
+    layers: Vec<Rc<RefCell<Layer>>>,
+    // trainingSet: TrainingSet,
+    trainingSetBatchSize: u32,
 }
 
 impl Network {
-    pub fn new(sizes: Vec<i32>) -> Network {
-        println!("Making Network:");
-
-        // let mut tempLayers: Vec<Layer> = Vec::new();
-        let mut tempLayers: Vec<Layer> = Vec::new();
-
-        // First Input Layer
-        tempLayers.push(Layer::new(sizes[0], 0));
-
-        for i in 1..sizes.len() {
-            tempLayers.push(Layer::new(sizes[i], sizes[i-1]));
-        }
-        
-        return Network {
-            layers: tempLayers
+    pub fn new() -> Network {
+        Network {
+            layers: Vec::new(),
+            // trainingSet: TrainingSet,
+            trainingSetBatchSize: 0,
         }
     }
 
-    // pub fn propagate(&mut self) {
-    //     println!(" - Propagation -");
-    //     let mut iter = &self.layers.windows(2);
-    //     for layers in iter.next() {
-    //         layers[0].propagate(&layers[1])
-    //     }
-    // }
-
-    // pub fn propagate(&mut self) {
-    //     // println!(" - Propagation -");
-    //     for i in 0..self.layers.len()-1 {
-    //         // println!("Layer Prop: #{}", i);
-    //         let lastLayer = self.layers.pop_front().expect("no layer found");
-    //         let mut thisLayer = self.layers.pop_front().expect("no layer found");
-
-    //         thisLayer.propagate(&lastLayer);
-
-    //         self.layers.push_front(thisLayer);
-    //         self.layers.push_back(lastLayer);
-    //     }
-
-    //     // Move last layer to then end
-    //     let lastLayer = self.layers.pop_front().expect("no layer found");
-    //     self.layers.push_back(lastLayer);
-    // }
-
-    pub fn backpropagate(&mut self) {
-        println!(" - Back Propagation -");
-        let mut iter1 = [1, 2, 3, 4, 5, 6].windows(3).borrow_mut();
-        for num in iter1 {
-            num[0] = 69;
-            println!("Nums:{}, {}, {}", num[0], num[1], num[2]);
+    pub fn Init(&mut self, inputNeuronCount: u32, trainingSetBatchSize: u32, outputNeuronSize: u32) {
+        if self.layers.len() != 0 {
+            panic!("neural net has an input layer already");
         }
 
-        let mut iter = self.layers.windows(2).borrow_mut();
-        for layers in iter {
-            layers[1].backpropagate(&layers[0]) 
-        }
+        self.trainingSetBatchSize = trainingSetBatchSize;
+
+        let mut inputLayer = Layer::new(inputNeuronCount);
+        inputLayer.SetActivationMatrix(inputNeuronCount, trainingSetBatchSize);
+
+        self.layers.push(Rc::new(RefCell::new(inputLayer)));
     }
 
-    // pub fn backpropagate(&mut self, expected: &Vec<f32>) {
-    //     println!(" - Back Propagation -");
-    //     let mut lastLayer = self.layers.pop_back().expect("no layer found");
-    //     let mut prevLayer = self.layers.pop_back().expect("no layer found");
-    // }
-
-    // pub fn backpropagate(&mut self, expected: &Vec<f32>) {
-    //     println!(" - Back Propagation -");
-    //     let mut lastLayer = self.layers.pop_back().expect("no layer found");
-    //     let mut prevLayer = self.layers.pop_back().expect("no layer found");
-
-    //     for i in 0..lastLayer.neurons.len() {
-    //         let desiredDelta = expected[i] - lastLayer.neurons[i].value;
-
-    //         lastLayer.neurons[i].backpropagate(&prevLayer.neurons, desiredDelta);
-    //     }
-
-    //     self.layers.push_back(prevLayer);
-    //     self.layers.push_back(lastLayer);
-    // }
-
-    // pub fn cost(&self, expected: &Vec<f32>) -> f32 {
-    //     let lastLayer = self.layers.back().expect("no layer found");
-    //     if lastLayer.neurons.len() != expected.len() {
-    //         panic!("expected and actual layer size does not match");
-    //     }
-
-    //     let mut sum = 0.0;
-
-    //     for i in 0..lastLayer.neurons.len() {
-    //         let neuronValue = lastLayer.neurons[i].value;
-    //         sum += (neuronValue - expected[i]) * (neuronValue - expected[i]);
-    //     }
-
-    //     return sum;
-    // }
-
-    pub fn print(&self) {
-        for layer in &self.layers {
-            println!("Layer #{}", layer.neurons.len());
-            layer.print();
+    pub fn AddLayer(&mut self, neuronCount: u32) {
+        if self.layers.len() < 1 {
+            panic!("An input layer must be present before adding hidden layers, please call Init()")
         }
+
+        let lastLayer = self.layers.last().unwrap();
+        let hiddenLayer = &Rc::new(RefCell::new(Layer::new(neuronCount)));
+
+        hiddenLayer.borrow_mut().SetPrevLayer(Rc::clone(lastLayer), self.trainingSetBatchSize);
+        lastLayer.borrow_mut().SetNextLayer(Rc::clone(hiddenLayer));
+
+        self.layers.push(Rc::clone(hiddenLayer));
     }
+
+    pub fn FeedForward(&mut self) {
+        if self.layers.len() < 1 {
+            panic!("cannot feed forward, there are not enough layers");
+        }
+        self.layers[0].borrow_mut().FeedForward();
+    }
+
+    pub fn BackProp() {}
 }

@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 mod Neural;
 use Neural::Network;
 
@@ -59,22 +61,21 @@ fn main() {
     println!("Starting...");
     // let (images, imageCount, rowCount, columnCount, labels) = getTrainingData();
 
-    let mut map = Vec::new();
-    // map.push(rowCount * columnCount);
-    map.push(100);
-    map.push(30);
-    map.push(10);
+    let mut network = Network::new();
+    network.Init(10, 5, 4);
+    network.AddLayer(10);
+    network.AddLayer(3);
+    network.AddLayer(4);
 
-    let mut network = Network::new(map);
-    println!(" - Network Created -");
+    // println!(" - Network Created -");
     
-    println!(" - Network Trained -");
+    // println!(" - Network Trained -");
 
     // network.propagate();
-    println!(" - Network Prediction: -");
+    // println!(" - Network Prediction: -");
     // network.print();
 
-    network.backpropagate();
+    // network.BackProp();
 
     // let zero = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
     // println!(" - Network Cost: {} -", network.cost(&zero));

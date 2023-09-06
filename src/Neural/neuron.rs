@@ -1,8 +1,12 @@
 pub struct Neuron {
-    pub value: f32,
-    pub desiredDelta: f32,
-    lastLayerWeights: Vec<f32>,
-    bias: f32
+    pub sums: f32,
+    pub deltaSums: f32,
+
+    pub weights: Vec<f32>,
+    pub deltaWeights: Vec<f32>,
+
+    pub bias: f32,
+    pub deltaBias: f32,
 }
 
 impl Neuron {
@@ -31,7 +35,7 @@ impl Neuron {
         }
 
         return Neuron {
-            value: 0.0,
+            sums: 0.0,
             desiredDelta: 0.0,
             lastLayerWeights: tempWeights,
             bias: Self::initRandWide()
